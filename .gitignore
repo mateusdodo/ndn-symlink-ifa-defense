@@ -1,0 +1,10 @@
+build/
+.waf*
+!.waf-tools
+.lock-waf*
+*.o
+__pycache__/
+sim/rate-trace*.txt
+.Rhistory
+.DS_Store
+*.pyc
