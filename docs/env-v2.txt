@@ -1,0 +1,15 @@
+data_utc: 2026-11-23T21:55:13Z
+host: Linux 5.15.0-139-generic x86_64 | cpus=8 | mem=7,8Gi
+docker: Docker version 26.1.3, build 26.1.3-0ubuntu1~20.04.1
+imagem: emrevoid/ndnsim@sha256:61bb5ecebcd828bc57422522f9e26f5f036ad8e03f2f61298c7790d01dcda199
+repo_commit: 0b6e07e15d66ff2e41895e294922fe69db881b78 (DIRTY)
+PRETTY_NAME="Ubuntu 20.04.1 LTS"
+g++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0
+Python 2.7.18rc1
+waf 2.0.18 (314689b8994259a84f0de0aaef74d7ce91f541ad)
+BUILD_PROFILE = 'optimized'
+commit /home/ndn/ndnSIM/ns-3: 173aec9e080c71e75cca67fb3088834a52f4956a
+commit /home/ndn/ndnSIM/ns-3/src/ndnSIM: 49ecab2fdf5523f87b55571286b528ff33e69df7
+commit /home/ndn/ndnSIM/ns-3/src/ndnSIM/NFD: d1d38c8558ce6ce71d9ba81ca6cf5dcfd0342820
+commit /home/ndn/ndnSIM/ns-3/src/ndnSIM/ndn-cxx: f2a5806bf49432ee7d1f98e98b1bc66b31a4aa54
+benchmark: md5 de 3000Hz identico ao piloto (determinismo byte a byte); tempos 10s/95s/388s para 200/1000/3000 Hz
