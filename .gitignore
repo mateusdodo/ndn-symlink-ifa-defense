@@ -9,3 +9,4 @@ sim/rate-trace*.txt
 .DS_Store
 *.pyc
 _bench/
+sim/results/

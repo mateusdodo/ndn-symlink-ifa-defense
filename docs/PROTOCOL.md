@@ -1,0 +1,52 @@
+# Protocolo experimental v1 (congelado em protocol-v1)
+
+Status: rascunho até a tag protocol-v1. Depois da tag, qualquer mudança vira
+"Desvio do protocolo" no fim deste arquivo, com data e motivo.
+
+## 1. Perguntas de pesquisa
+RQ1. Um detector leve por face identifica IFA com TPR e FPR aceitáveis em
+     tráfego legítimo difícil (flash crowd, falha de enlace)?
+RQ2. O desvio para um nó de quarentena preserva o ISR dos usuários legítimos
+     durante o ataque, frente a nenhuma defesa e a rate-limit por face?
+RQ3. Qual o custo de um falso positivo (ISR do tráfego legítimo desviado)?
+RQ4. O detector generaliza para taxas de ataque e topologias não vistas no treino?
+
+## 2. Hipóteses falsificáveis (limiares a preencher na decisão 1)
+H1. ISR(A5) - ISR(A1) >= [X] pontos percentuais, IC95% exclui zero.
+H2. ISR(A5) >= ISR(A2), Wilcoxon pareado por semente, alfa = 0,05 com Holm.
+H3. FPR do detector <= [Y]% em tráfego legítimo (validação leave-scenario-out).
+H4. ISR(A6) - ISR(A0) >= -[Z] p.p. (degradação graduada limitada).
+Refutação: se qualquer IC95% incluir o limiar contrário, a hipótese é refutada
+e reportada como tal.
+
+## 3. Métricas
+ISR (Interest Satisfaction Ratio) do usuário legítimo; ocupação da PIT;
+TPR, FPR, F1 e tempo até detecção; custo de falso positivo.
+
+## 4. Desenho
+Topologia: usuário e atacante -> R1 -> produtor (gargalo); Q ligado a R1.
+Carga do ataque em rho = carga/capacidade, rho em {0 (A0), 1, 2, 5}.
+Duração: 30 s simulados; ataque de 10 s a 25 s.
+Produtor ignora /fake para a PIT permanecer pendente.
+Tráfego legítimo: chegadas exponenciais a 20 Hz; cenários: estável,
+flash crowd, falha de enlace.
+
+## 5. Sementes
+Desenvolvimento: 1-10 (depuração e escolha de limiares do detector).
+Confirmação: 101-130, executadas uma única vez, após a tag protocol-v1.
+
+## 6. Estatística
+IC95% por bootstrap; Wilcoxon pareado por semente; Holm para comparações
+múltiplas; Cliff's delta como tamanho de efeito.
+
+## 7. Detector
+Random Forest; baselines: limiar simples em InInterests e regressão logística.
+Rótulo pelo instante real do ataque. Validação leave-scenario-out e
+GroupKFold por simulação. Ablação com e sem InNacks.
+
+## 8. Ameaças à validade
+Simulação (ndnSIM 2.8) vs rede real; topologia única; produtor sintético;
+imagem de terceiros (mitigação: digest fixado).
+
+## 9. Desvios do protocolo
+(nenhum)
