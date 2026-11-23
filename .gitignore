@@ -8,3 +8,4 @@ sim/rate-trace*.txt
 .Rhistory
 .DS_Store
 *.pyc
+_bench/
