@@ -71,3 +71,9 @@ GRADE CONGELADA (definida só com o A0, antes de qualquer resultado de A2/A6 sob
 Picos de 100 e 150 Hz saturam o A0 e ficam fora da grade (sobrecarga, nao flash crowd).
 Limitacao: uma face legitima nao passa de ~85 Interests/s, entao A2 com rlFrac>=0.5 (limite>=98/s)
 nao deve cortar trafego legitimo nesta topologia; o custo de A2 so aparece com limite < pico.
+
+## Correção (2026-11-24)
+Os resultados de A2 e A6 em results/dev/fc/ foram obtidos com atacante (rho=2 e o padrao), nao
+"sem atacante". Sao o cenario combinado (ataque + flash crowd). Achado: A6 com Q compartilhado
+com o atacante tem ISR(1s)~0.28 e atraso ~5 s (falso positivo muito custoso); A2 so funciona em
+rlFrac~0.5 (0.25 corta o legitimo, 1.0 deixa o ataque passar).
