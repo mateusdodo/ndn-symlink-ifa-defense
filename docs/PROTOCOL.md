@@ -116,3 +116,13 @@ Rotulo por face e janela: atacante e positivo apenas em [atkStart, atkStop]; use
 Features (de faces.csv, por face): dInI, dOutD, dInI-dOutD, razao dOutD/dInI. Sem InNacks (sempre 0).
 Validacao: leave-one-scenario-out e agrupada por execucao. Baselines: limiar em dInI-dOutD e regressao
 logistica. Teste de generalizacao: ataque distribuido (Exp. 3) nunca visto no treino.
+
+## Revisao de literatura (2026-11-24; Benmoussa et al., ACM CSUR 55(7), 2022 + busca web)
+- IFA distribuido/baixa taxa: Secoes 4.1 e 7.2.8-7.2.12 do survey; justifica o Exp. 3.
+- EMENDA ao Exp. 3 (antes de rodar): incluir nAtk {16, 32} (baixa taxa por face); grade passa a {1,4,8,16,32}.
+- Rate limiting = 66% das solucoes (baseline A2 adequado); penaliza legitimos na mesma face (Sec. 7.1, Fig. 6).
+- Nenhuma das 43 solucoes do survey redireciona trafego para quarentena; busca nao achou uso de
+  ForwardingHint para IFA. Redacao: "ate onde conseguimos verificar".
+- Random Forest: uso comum e competitivo, sem evidencia de ser o melhor; mantem-se baselines.
+- Link Object/ForwardingHint: origem SNAMP (Afanasyev et al., 2015; NDN-0004); atribuicao a Antunes nao verificada.
+- Premissa: o roteador insere o hint (uso padrao: consumidor).
