@@ -35,6 +35,7 @@ public:
   static std::map<FaceId, RateWin> s_qWin;
   static std::map<FaceId, RateWin> s_win;
   static uint64_t s_hintSent, s_normalSent, s_rlDrops, s_qDrops;
+  static uint64_t s_nsHint, s_nHint, s_nsNormal, s_nNormal, s_bytesHint, s_bytesNormal;
 };
 
 } // namespace fw

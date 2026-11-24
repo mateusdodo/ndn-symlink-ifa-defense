@@ -1,5 +1,6 @@
 #include "quarantine-strategy.hpp"
 #include "ns3/simulator.h"
+#include <chrono>
 
 namespace nfd {
 namespace fw {
@@ -14,6 +15,12 @@ uint64_t QuarantineStrategy::s_hintSent = 0;
 uint64_t QuarantineStrategy::s_normalSent = 0;
 uint64_t QuarantineStrategy::s_rlDrops = 0;
 uint64_t QuarantineStrategy::s_qDrops = 0;
+uint64_t QuarantineStrategy::s_nsHint = 0;
+uint64_t QuarantineStrategy::s_nHint = 0;
+uint64_t QuarantineStrategy::s_nsNormal = 0;
+uint64_t QuarantineStrategy::s_nNormal = 0;
+uint64_t QuarantineStrategy::s_bytesHint = 0;
+uint64_t QuarantineStrategy::s_bytesNormal = 0;
 
 QuarantineStrategy::QuarantineStrategy(Forwarder& forwarder, const Name& name)
   : Strategy(forwarder)
@@ -55,6 +62,7 @@ QuarantineStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Inte
     return;
   }
 
+  auto t0 = std::chrono::steady_clock::now();   // M3: inicio do trecho medido
   // A4: face suspeita -> copia com ForwardingHint -> face de Q
   if (s_quarantineFace != nullptr && s_suspects.count(ingress.face.getId()) > 0) {
     if (s_qLimit > 0) {   // Exp. 2: limite por face sobre o trafego desviado
@@ -71,6 +79,12 @@ QuarantineStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Inte
     ::ndn::DelegationList hint;
     hint.insert(1, Name("/quarentena"));
     copy->setForwardingHint(hint);
+    {
+      auto t1 = std::chrono::steady_clock::now();
+      s_nsHint += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+      ++s_nHint;
+      s_bytesHint += copy->wireEncode().size();   // M2 (fora do trecho medido)
+    }
     ++s_hintSent;
     this->sendInterest(pitEntry, FaceEndpoint(*s_quarantineFace, 0), *copy);
     return;
@@ -80,6 +94,12 @@ QuarantineStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Inte
   for (const auto& nh : fibEntry.getNextHops()) {
     if (!canForwardTo(ingress.face, pitEntry, nh)) {
       continue;
+    }
+    {
+      auto t1 = std::chrono::steady_clock::now();
+      s_nsNormal += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+      ++s_nNormal;
+      s_bytesNormal += interest.wireEncode().size();
     }
     ++s_normalSent;
     this->sendInterest(pitEntry, FaceEndpoint(nh.getFace(), 0), interest);
