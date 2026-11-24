@@ -77,3 +77,17 @@ Os resultados de A2 e A6 em results/dev/fc/ foram obtidos com atacante (rho=2 e 
 "sem atacante". Sao o cenario combinado (ataque + flash crowd). Achado: A6 com Q compartilhado
 com o atacante tem ISR(1s)~0.28 e atraso ~5 s (falso positivo muito custoso); A2 so funciona em
 rlFrac~0.5 (0.25 corta o legitimo, 1.0 deixa o ataque passar).
+
+## EXPERIMENTO 2 (declarado em 2026-11-24, ANTES de qualquer execucao; exploratorio)
+Motivacao: no Experimento 1, A6 com atacante dividindo Q (50 Kbps) teve ISR(1s)~0.28 e atraso ~5 s.
+Justificativa independente do resultado: uma quarentena compartilhada sem isolamento nao e um
+desenho realista de tratamento de falso positivo.
+Mudanca: limite por face de entrada sobre Interests desviados para Q (--qFrac x capacidade, Interests/s).
+Vale so para faces suspeitas. Nada muda para faces normais. qFrac=0 reproduz o Experimento 1.
+Grade: qFrac {0.1, 0.2, 0.5}; picos {40, 60, 80} Hz; rho=2; sementes de desenvolvimento 1-3.
+Hipoteses (inalteradas): custo do falso positivo limitado (ISR(A6)-ISR(A0) >= -Z p.p.), e A4/A5
+mais robustos a calibracao que A2.
+Previsoes: A6 com qFrac=0.2 recupera o ISR do usuario (>=0.9 nos tres picos); qFrac=0.5 ainda
+satura Q (Interest com hint ~50 B -> Q comporta ~120/s); qFrac=0.1 protege Q mas pode cortar o
+usuario no pico de 80 Hz se ele ficar acima do limite. Se isso nao ocorrer, reporta-se como achado.
+O Experimento 1 e seus resultados permanecem no artigo.
