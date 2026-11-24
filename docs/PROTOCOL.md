@@ -50,3 +50,10 @@ imagem de terceiros (mitigação: digest fixado).
 
 ## 9. Desvios do protocolo
 (nenhum)
+
+## Verificação do mecanismo (dev, 2026-11-23)
+Teste de 3 nós (ifa-hint-test, userHz=10, 10 s): com a face de A suspeita, 91/91 Interests
+de A foram a Q com ForwardingHint, 0 chegaram com hint residual, 91/91 Data retornaram;
+B (83/83) foi ao produtor. Controle (suspect=0): 0 desvios. Estratégia: best-route
+simplificado derivado de Strategy; Q ligado direto ao R1. Evidência de consumo do hint é
+indireta (sem NS_LOG na imagem otimizada).
