@@ -62,3 +62,12 @@ indireta (sem NS_LOG na imagem otimizada).
 rlFrac 0.25 / 0.5: ISR(1s)=1.00; rlFrac 1.0: 0.92-0.95; rlFrac 2.0: ~0.49 (igual a A1).
 Goodput no prazo: A0/A2(0.5)/A4 ~18-19.5 Data/s; A1 ~3.5-4.6 Data/s.
 Contra atacante puro, A2 (rlFrac<=0.5) e A4 empatam no ISR; A4 tem menor atraso (0.022 s vs 0.12 s).
+
+## Calibração do flash crowd (dev, A0 sem atacante, sementes 1-3, 2026-11-24)
+Pico do usuário (Hz): 40 -> ISR 1.00 | 60 -> 1.00 | 80 -> 0.99 | 100 -> 0.60 | 150 -> 0.13-0.24.
+O gargalo (50 Kbps) comporta ~85-95 Data/s: o A0 satura entre 80 e 100 Hz (Data maior que Interest).
+GRADE CONGELADA (definida só com o A0, antes de qualquer resultado de A2/A6 sob flash crowd):
+  picos {40, 60, 80} Hz; A2 com rlFrac {0.25, 0.5, 1.0}; A6 com markAt=10 s.
+Picos de 100 e 150 Hz saturam o A0 e ficam fora da grade (sobrecarga, nao flash crowd).
+Limitacao: uma face legitima nao passa de ~85 Interests/s, entao A2 com rlFrac>=0.5 (limite>=98/s)
+nao deve cortar trafego legitimo nesta topologia; o custo de A2 so aparece com limite < pico.
