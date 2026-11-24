@@ -126,3 +126,22 @@ logistica. Teste de generalizacao: ataque distribuido (Exp. 3) nunca visto no tr
 - Random Forest: uso comum e competitivo, sem evidencia de ser o melhor; mantem-se baselines.
 - Link Object/ForwardingHint: origem SNAMP (Afanasyev et al., 2015; NDN-0004); atribuicao a Antunes nao verificada.
 - Premissa: o roteador insere o hint (uso padrao: consumidor).
+
+## EXPERIMENTO 4: overhead do desvio (declarado em 2026-11-24, ANTES de implementar e rodar; secundario)
+Motivacao: "O(1)" nao e mensuravel no ndnSIM (sem custo de CPU simulado). Substituido por tres medidas.
+M1 (FIB): snapshot da FIB de R1 (prefixo, faces, custos) antes e depois da simulacao.
+  Hipotese: identicos em todas as execucoes. Refutada se qualquer snapshot diferir.
+  Limite: mostra ausencia de mudanca liquida, nao de eventos.
+M2 (bytes): tamanho medio do Interest (wireEncode) no ramo com hint e no ramo normal, dentro da estrategia.
+  Previsao: normal 30-34 B; com hint +16 a +30 B. Excluidos os cabecalhos de enlace.
+M3 (CPU): ns por chamada no trecho decisao+preparo do pacote (da entrada ate antes de sendInterest), por ramo,
+  com std::chrono::steady_clock dentro da simulacao. Varre-se, um fator por vez, fibN {0,1e3,1e4,1e5}
+  entradas falsas na FIB e suspN {0,1e2,1e4,1e6} faces suspeitas falsas (arm=4, rho=2, sementes 1-5,
+  execucao sequencial). Tambem arm 0 e arm 1 (PIT ~1 contra ~800) para o ramo normal.
+  "Constante": razao entre a mediana da maior e da menor configuracao dentro de [0.8, 1.25].
+PREVISOES: ramo hint constante em fibN (nao consulta a FIB); ramo normal pode crescer com fibN;
+  ambos crescem com suspN (std::set, O(log n)). Logo "constante" so se sustenta em relacao a FIB,
+  nao ao numero de faces suspeitas.
+Limites: tempo de parede em VM; mede so o callback da estrategia, nao o pipeline nem linha de velocidade.
+Redacao permitida: "sem reindexacao da FIB" se M1 passar; "custo constante em relacao ao tamanho da FIB"
+  so se M3 passar. Nunca "O(1)" sem qualificar.
