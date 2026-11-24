@@ -7,10 +7,13 @@ namespace fw {
 std::set<FaceId> QuarantineStrategy::s_suspects;
 Face* QuarantineStrategy::s_quarantineFace = nullptr;
 double QuarantineStrategy::s_rlLimit = 0;
+double QuarantineStrategy::s_qLimit = 0;
+std::map<FaceId, QuarantineStrategy::RateWin> QuarantineStrategy::s_qWin;
 std::map<FaceId, QuarantineStrategy::RateWin> QuarantineStrategy::s_win;
 uint64_t QuarantineStrategy::s_hintSent = 0;
 uint64_t QuarantineStrategy::s_normalSent = 0;
 uint64_t QuarantineStrategy::s_rlDrops = 0;
+uint64_t QuarantineStrategy::s_qDrops = 0;
 
 QuarantineStrategy::QuarantineStrategy(Forwarder& forwarder, const Name& name)
   : Strategy(forwarder)
@@ -54,6 +57,16 @@ QuarantineStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Inte
 
   // A4: face suspeita -> copia com ForwardingHint -> face de Q
   if (s_quarantineFace != nullptr && s_suspects.count(ingress.face.getId()) > 0) {
+    if (s_qLimit > 0) {   // Exp. 2: limite por face sobre o trafego desviado
+      double now = ns3::Simulator::Now().GetSeconds();
+      RateWin& w = s_qWin[ingress.face.getId()];
+      if (now - w.start >= 1.0) { w.start = now; w.n = 0; }
+      if (++w.n > s_qLimit) {
+        ++s_qDrops;
+        this->rejectPendingInterest(pitEntry);
+        return;
+      }
+    }
     auto copy = std::make_shared<Interest>(interest);
     ::ndn::DelegationList hint;
     hint.insert(1, Name("/quarentena"));

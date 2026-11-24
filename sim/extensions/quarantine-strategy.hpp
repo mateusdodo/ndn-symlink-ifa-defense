@@ -31,8 +31,10 @@ public:
   static std::set<FaceId> s_suspects;
   static Face* s_quarantineFace;
   static double s_rlLimit;
+  static double s_qLimit;
+  static std::map<FaceId, RateWin> s_qWin;
   static std::map<FaceId, RateWin> s_win;
-  static uint64_t s_hintSent, s_normalSent, s_rlDrops;
+  static uint64_t s_hintSent, s_normalSent, s_rlDrops, s_qDrops;
 };
 
 } // namespace fw

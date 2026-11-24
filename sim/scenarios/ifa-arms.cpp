@@ -89,7 +89,7 @@ static void SampleFaces(double period) {
 int run(int argc, char* argv[]) {
   int arm = 1;
   double rho = 2.0, duration = 30.0, atkStart = 10.0, atkStop = 25.0, userHz = 20.0, rlFrac = 0.5;
-  double fcPeak = 0.0, fcStart = 10.0, fcStop = 25.0, markAt = 10.0;
+  double fcPeak = 0.0, fcStart = 10.0, fcStop = 25.0, markAt = 10.0, qFrac = 0.0;
   uint32_t interestBytes = 32, payload = 32;
   std::string bw = "50Kbps", qbw = "50Kbps", outDir = ".", commit = "unknown";
 
@@ -98,6 +98,7 @@ int run(int argc, char* argv[]) {
   cmd.AddValue("fcPeak", "taxa total do usuario no flash crowd (Hz); 0 = sem flash crowd", fcPeak);
   cmd.AddValue("fcStart", "inicio do flash crowd (s)", fcStart);
   cmd.AddValue("fcStop", "fim do flash crowd (s)", fcStop);
+  cmd.AddValue("qFrac", "Exp.2: limite por face sobre trafego desviado = qFrac x capacidade (0 = off)", qFrac);
   cmd.AddValue("markAt", "A6: instante em que a face do usuario e marcada (falso positivo)", markAt);
   cmd.AddValue("rho", "carga do ataque / capacidade do gargalo", rho);
   cmd.AddValue("rlFrac", "A2: limite por face = rlFrac x capacidade (Interests/s)", rlFrac);
@@ -165,6 +166,7 @@ int run(int argc, char* argv[]) {
     Simulator::Schedule(Seconds(markAt), &MarkSuspect, faceUser->getId());
   }
   if (arm == 2) QuarantineStrategy::s_rlLimit = rlFrac * capacityHz;
+  QuarantineStrategy::s_qLimit = qFrac * capacityHz;
 
   ndn::AppHelper pApp("ns3::ndn::Producer");
   pApp.SetPrefix("/data");
@@ -234,7 +236,7 @@ int run(int argc, char* argv[]) {
        << "\nnormalSent=" << QuarantineStrategy::s_normalSent
        << "\nblackhole_prod=" << ndn::BlackholeProducer::s_received[prod->GetId()]
        << "\nblackhole_q=" << ndn::BlackholeProducer::s_received[q->GetId()]
-       << "\nfcPeak=" << fcPeak << "\nmarkAt=" << markAt << "\nbw=" << bw << "\nqbw=" << qbw << "\nuserHz=" << userHz
+       << "\nqFrac=" << qFrac << "\nqDrops=" << QuarantineStrategy::s_qDrops << "\nfcPeak=" << fcPeak << "\nmarkAt=" << markAt << "\nbw=" << bw << "\nqbw=" << qbw << "\nuserHz=" << userHz
        << "\nduration=" << duration << "\natkStart=" << atkStart << "\natkStop=" << atkStop
        << "\ndeadline=" << g_deadline << "\ncommit=" << commit << "\n";
   return 0;
