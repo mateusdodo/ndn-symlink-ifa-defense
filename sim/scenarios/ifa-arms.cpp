@@ -44,6 +44,10 @@ static double g_deadline = 1.0;
 static std::ofstream g_faces;
 static Ptr<Node> g_r1;
 
+static void MarkSuspect(nfd::FaceId id) {
+  nfd::fw::QuarantineStrategy::s_suspects.insert(id);
+}
+
 static void OnUserTx(std::shared_ptr<const ndn::Interest> i, Ptr<ndn::App>, std::shared_ptr<ndn::Face>) {
   std::string n = i->getName().toUri();
   if (g_sentTime.count(n)) return;
@@ -85,11 +89,16 @@ static void SampleFaces(double period) {
 int run(int argc, char* argv[]) {
   int arm = 1;
   double rho = 2.0, duration = 30.0, atkStart = 10.0, atkStop = 25.0, userHz = 20.0, rlFrac = 0.5;
+  double fcPeak = 0.0, fcStart = 10.0, fcStop = 25.0, markAt = 10.0;
   uint32_t interestBytes = 32, payload = 32;
   std::string bw = "50Kbps", qbw = "50Kbps", outDir = ".", commit = "unknown";
 
   CommandLine cmd;
-  cmd.AddValue("arm", "0=A0 1=A1 2=A2 4=A4", arm);
+  cmd.AddValue("arm", "0=A0 1=A1 2=A2 4=A4 6=A6", arm);
+  cmd.AddValue("fcPeak", "taxa total do usuario no flash crowd (Hz); 0 = sem flash crowd", fcPeak);
+  cmd.AddValue("fcStart", "inicio do flash crowd (s)", fcStart);
+  cmd.AddValue("fcStop", "fim do flash crowd (s)", fcStop);
+  cmd.AddValue("markAt", "A6: instante em que a face do usuario e marcada (falso positivo)", markAt);
   cmd.AddValue("rho", "carga do ataque / capacidade do gargalo", rho);
   cmd.AddValue("rlFrac", "A2: limite por face = rlFrac x capacidade (Interests/s)", rlFrac);
   cmd.AddValue("bw", "capacidade do enlace R1-produtor", bw);
@@ -122,7 +131,7 @@ int run(int argc, char* argv[]) {
   qlink.SetDeviceAttribute("DataRate", StringValue(qbw));
   qlink.SetChannelAttribute("Delay", StringValue("1ms"));
 
-  fast.Install(user, r1);
+  NetDeviceContainer dUser = fast.Install(user, r1);   // Get(1) esta em R1
   NetDeviceContainer dAtt = fast.Install(att, r1);   // Get(1) esta em R1
   bottleneck.Install(r1, prod);
   NetDeviceContainer dQ = qlink.Install(r1, q);      // Get(0) esta em R1
@@ -147,9 +156,14 @@ int run(int argc, char* argv[]) {
   auto l3 = r1->GetObject<ndn::L3Protocol>();
   auto faceAtt = l3->getFaceByNetDevice(dAtt.Get(1));
   auto faceQ = l3->getFaceByNetDevice(dQ.Get(0));
+  auto faceUser = l3->getFaceByNetDevice(dUser.Get(1));
   using nfd::fw::QuarantineStrategy;
   QuarantineStrategy::s_quarantineFace = faceQ.get();
   if (arm == 4) QuarantineStrategy::s_suspects.insert(faceAtt->getId());
+  if (arm == 6) {   // A6: face do usuario marcada por engano; atacante (se houver) tambem desviado
+    if (rho > 0) QuarantineStrategy::s_suspects.insert(faceAtt->getId());
+    Simulator::Schedule(Seconds(markAt), &MarkSuspect, faceUser->getId());
+  }
   if (arm == 2) QuarantineStrategy::s_rlLimit = rlFrac * capacityHz;
 
   ndn::AppHelper pApp("ns3::ndn::Producer");
@@ -183,6 +197,18 @@ int run(int argc, char* argv[]) {
     ac.Stop(Seconds(atkStop));
   }
 
+  if (fcPeak > userHz) {   // flash crowd: trafego legitimo extra, prefixo proprio
+    ndn::AppHelper fApp("ns3::ndn::ConsumerCbr");
+    fApp.SetPrefix("/data/fc");
+    fApp.SetAttribute("Frequency", DoubleValue(fcPeak - userHz));
+    fApp.SetAttribute("Randomize", StringValue("exponential"));
+    ApplicationContainer fc = fApp.Install(user);
+    fc.Start(Seconds(fcStart));
+    fc.Stop(Seconds(fcStop));
+    fc.Get(0)->TraceConnectWithoutContext("TransmittedInterests", MakeCallback(&OnUserTx));
+    fc.Get(0)->TraceConnectWithoutContext("ReceivedDatas", MakeCallback(&OnUserRx));
+  }
+
   g_faces.open(outDir + "/faces.csv");
   g_faces << std::unitbuf;
   g_faces << "t,face,inI,outI,inD,outD,inN,outN,pit\n";
@@ -208,7 +234,7 @@ int run(int argc, char* argv[]) {
        << "\nnormalSent=" << QuarantineStrategy::s_normalSent
        << "\nblackhole_prod=" << ndn::BlackholeProducer::s_received[prod->GetId()]
        << "\nblackhole_q=" << ndn::BlackholeProducer::s_received[q->GetId()]
-       << "\nbw=" << bw << "\nqbw=" << qbw << "\nuserHz=" << userHz
+       << "\nfcPeak=" << fcPeak << "\nmarkAt=" << markAt << "\nbw=" << bw << "\nqbw=" << qbw << "\nuserHz=" << userHz
        << "\nduration=" << duration << "\natkStart=" << atkStart << "\natkStop=" << atkStop
        << "\ndeadline=" << g_deadline << "\ncommit=" << commit << "\n";
   return 0;
