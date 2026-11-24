@@ -57,3 +57,8 @@ de A foram a Q com ForwardingHint, 0 chegaram com hint residual, 91/91 Data reto
 B (83/83) foi ao produtor. Controle (suspect=0): 0 desvios. Estratégia: best-route
 simplificado derivado de Strategy; Q ligado direto ao R1. Evidência de consumo do hint é
 indireta (sem NS_LOG na imagem otimizada).
+
+## Calibração de A2 (dev, sementes 1-3, ataque rho=2, userHz=20, deadline 1 s)
+rlFrac 0.25 / 0.5: ISR(1s)=1.00; rlFrac 1.0: 0.92-0.95; rlFrac 2.0: ~0.49 (igual a A1).
+Goodput no prazo: A0/A2(0.5)/A4 ~18-19.5 Data/s; A1 ~3.5-4.6 Data/s.
+Contra atacante puro, A2 (rlFrac<=0.5) e A4 empatam no ISR; A4 tem menor atraso (0.022 s vs 0.12 s).
