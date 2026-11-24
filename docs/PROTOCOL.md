@@ -91,3 +91,28 @@ Previsoes: A6 com qFrac=0.2 recupera o ISR do usuario (>=0.9 nos tres picos); qF
 satura Q (Interest com hint ~50 B -> Q comporta ~120/s); qFrac=0.1 protege Q mas pode cortar o
 usuario no pico de 80 Hz se ele ficar acima do limite. Se isso nao ocorrer, reporta-se como achado.
 O Experimento 1 e seus resultados permanecem no artigo.
+
+## Resultado do Experimento 2 (dev, sementes 1-3, rho=2) e conclusoes
+Custo do falso positivo (ISR A6 - A4, A4=0.997-0.999). qFrac 0.1: -27/-60/-68 p.p. (picos 40/60/80);
+qFrac 0.2: 0/-8.5/-38; qFrac 0.5: -8/-13/-17. Exp. 1 (sem limite): ~ -72 p.p.
+Previsoes: qFrac=0.2 >=0.9 nos 3 picos REFUTADA (0.62 em 80 Hz); qFrac=0.5 satura Q: confirmada em parte
+(0.83-0.92, sem colapso); qFrac=0.1 so corta em 80 Hz: ERRADA (limite ~19.5/s corta em todos os picos).
+Conclusao: "nao punitivo" nao se sustenta; defensavel e "degradacao limitada dependente de qFrac".
+qFrac tem o mesmo problema de calibracao do rlFrac. A2 (rl=0.5) fica perto do oraculo contra atacante unico.
+
+## EXPERIMENTO 3 (declarado em 2026-11-24, ANTES de implementar e rodar; exploratorio)
+Motivacao: A2 e dificil de superar contra atacante unico. Justificativa a verificar na literatura:
+IFA e tipicamente distribuido; limite por face nao atua se cada face fica abaixo do limite.
+Mudanca: --nAtk atacantes em faces distintas, taxa total rho dividida igualmente.
+Grade: nAtk {1, 4, 8}; rho=2; flash crowd {0, 60} Hz; A1, A2 (rlFrac 0.25/0.5), A4 (todas as faces atacantes
+suspeitas); depois A5. Sementes de desenvolvimento 1-3.
+Previsoes: A2(rl=0.5) com nAtk=4 e 8 perde o efeito (ISR(1s) < 0.7), pois cada face fica <= ~98/s;
+A2(rl=0.25) falha com nAtk=8 (49/s por face). A4 nao depende de nAtk. Se A2(rl=0.5) com nAtk=4
+mantiver ISR >= 0.9, o argumento do ataque distribuido e refutado e sera reportado.
+
+## Detector: regras declaradas antes de gerar dados
+Treino: sementes 1-5, A1 (sem defesa), rho {0,1,2,3} x pico do usuario {0,40,60,80}; 80 execucoes.
+Rotulo por face e janela: atacante e positivo apenas em [atkStart, atkStop]; user e normal sempre.
+Features (de faces.csv, por face): dInI, dOutD, dInI-dOutD, razao dOutD/dInI. Sem InNacks (sempre 0).
+Validacao: leave-one-scenario-out e agrupada por execucao. Baselines: limiar em dInI-dOutD e regressao
+logistica. Teste de generalizacao: ataque distribuido (Exp. 3) nunca visto no treino.
